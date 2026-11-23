@@ -1,16 +1,25 @@
 {
-  "id": "coolcode-tool-template",
-  "title": "CoolCode Tool Starter",
-  "description": "A browser-only example that trims lines and removes exact duplicates.",
-  "category": "security",
-  "tags": ["text", "lines", "duplicates"],
-  "icon": "scan-search",
-  "url": "/coolcode-tool-template/",
-  "source": "https://github.com/jsdyer/coolcode-tool-template",
+  "id": "violationsheet",
+  "title": "Violation Sheet",
+  "description": "Compare police-reported crime rates for a B.C. police service with the previous published year and with the provincial rate.",
+  "category": "places",
+  "tags": ["canada", "british columbia", "crime", "statcan", "public data"],
+  "icon": "gavel",
+  "url": "/violationsheet/",
+  "source": "https://github.com/jsdyer/violationsheet",
   "hosting": "project",
   "access": "browser",
   "data_info": {
-    "mode": "local",
-    "detail": "The browser reads the text you paste and compares its lines."
+    "mode": "snapshot",
+    "cadence": "When StatCan releases the table",
+    "detail": "Statistics Canada table 35-10-0184 supplies annual police-reported incidents and rates per 100,000 for British Columbia police services.",
+    "probes": [
+      {
+        "label": "Extract",
+        "url": "https://coolcode.ca/violationsheet/data/status.json",
+        "path": ["retrieved"],
+        "count_at": { "path": ["services"], "unit": "police services" }
+      }
+    ]
   }
 }

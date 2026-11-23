@@ -1,0 +1,46 @@
+name: Refresh crime extract
+on:
+  workflow_dispatch:
+concurrency:
+  group: violationsheet-extract
+  cancel-in-progress: false
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      actions: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - name: Refresh the crime extract
+        run: python3 scripts/refresh.py
+      - name: Test
+        run: |
+          node --test tests/*.test.mjs
+          python3 -m unittest discover -s tests -v
+      - name: Build
+        run: python3 scripts/build.py
+      - name: Commit the validated extract and rebuild Pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! git diff --quiet -- web/data; then
+            git add web/data
+            git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'Refresh crime extract'
+            git push origin HEAD:main
+            gh workflow run pages.yml --ref main
+          elif [ "${GITHUB_RUN_ATTEMPT}" -gt 1 ]; then
+            gh workflow run pages.yml --ref main
+          fi
